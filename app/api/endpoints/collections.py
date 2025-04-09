@@ -53,29 +53,12 @@ async def create_collection(request: CreateCollectionRequest) -> SuccessResponse
     client = get_chroma_client()
 
     try:
-        embedding_function = get_embedding_function(request.embedding_function_name)
+        embedding_function = get_embedding_function()  # openai
 
         hnsw_config = CreateHNSWConfiguration()
-        if request.space:
-            hnsw_config["space"] = request.space
-        if request.ef_construction:
-            hnsw_config["ef_construction"] = request.ef_construction
-        if request.ef_search:
-            hnsw_config["ef_search"] = request.ef_search
-        if request.max_neighbors:
-            hnsw_config["max_neighbors"] = request.max_neighbors
-        if request.num_threads:
-            hnsw_config["num_threads"] = request.num_threads
-        if request.batch_size:
-            hnsw_config["batch_size"] = request.batch_size
-        if request.sync_threshold:
-            hnsw_config["sync_threshold"] = request.sync_threshold
-        if request.resize_factor:
-            hnsw_config["resize_factor"] = request.resize_factor
-
         configuration = CreateCollectionConfiguration(hnsw=hnsw_config, embedding_function=embedding_function)
 
-        client.create_collection(name=request.collection_name, configuration=configuration, metadata=request.metadata)
+        client.create_collection(name=request.collection_name, configuration=configuration)
 
         return SuccessResponse(message=f"Successfully created collection {request.collection_name}")
     except Exception as e:
@@ -149,7 +132,7 @@ async def get_collection_count(collection_name: str) -> int:
 
 @router.put("/{collection_name}", response_model=SuccessResponse)
 async def modify_collection(collection_name: str, request: ModifyCollectionRequest) -> SuccessResponse:
-    """Modify a Chroma collection's name or metadata.
+    """Modify a Chroma collection's name
 
     Args:
         collection_name: Name of the collection to modify
@@ -163,33 +146,12 @@ async def modify_collection(collection_name: str, request: ModifyCollectionReque
         collection = client.get_collection(collection_name)
 
         hnsw_config = UpdateHNSWConfiguration()
-        if request.ef_search:
-            hnsw_config["ef_search"] = request.ef_search
-        if request.num_threads:
-            hnsw_config["num_threads"] = request.num_threads
-        if request.batch_size:
-            hnsw_config["batch_size"] = request.batch_size
-        if request.sync_threshold:
-            hnsw_config["sync_threshold"] = request.sync_threshold
-        if request.resize_factor:
-            hnsw_config["resize_factor"] = request.resize_factor
-
         configuration = UpdateCollectionConfiguration(hnsw=hnsw_config)
-        collection.modify(name=request.new_name, configuration=configuration, metadata=request.new_metadata)
+        collection.modify(name=request.new_name, configuration=configuration)
 
         modified_aspects = []
         if request.new_name:
             modified_aspects.append("name")
-        if request.new_metadata:
-            modified_aspects.append("metadata")
-        if (
-            request.ef_search
-            or request.num_threads
-            or request.batch_size
-            or request.sync_threshold
-            or request.resize_factor
-        ):
-            modified_aspects.append("hnsw")
 
         return SuccessResponse(
             message=f"Successfully modified collection {collection_name}: updated {' and '.join(modified_aspects)}"
