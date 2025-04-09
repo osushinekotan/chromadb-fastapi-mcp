@@ -1,7 +1,9 @@
 import uuid
 
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 from fastapi import APIRouter, HTTPException
 
+from app.core.config import get_settings
 from app.db.client import get_chroma_client
 from app.models.document import (
     AddDocumentsRequest,
@@ -13,6 +15,7 @@ from app.models.document import (
     SuccessResponse,
 )
 
+settings = get_settings()
 router = APIRouter()
 
 
@@ -30,11 +33,21 @@ async def add_documents(request: AddDocumentsRequest) -> SuccessResponse:
         raise HTTPException(status_code=400, detail="The 'documents' list cannot be empty.")
 
     client = get_chroma_client()
+    print("Number of documents that can be inserted at once: ", client.max_batch_size)
     try:
-        collection = client.get_or_create_collection(request.collection_name)
+        collection = client.get_or_create_collection(
+            request.collection_name,
+            embedding_function=OpenAIEmbeddingFunction(
+                api_key=settings.OPENAI_API_KEY,
+                model_name="text-embedding-3-small",
+            ),
+        )
 
         # Generate sequential IDs
-        ids = [uuid.uuid4() for _ in range(len(request.documents))]
+        ids = [str(uuid.uuid4()) for _ in range(len(request.documents))]
+        for metadata, _id in zip(request.metadatas, ids, strict=True):
+            if not metadata:
+                metadata["id"] = _id
 
         collection.add(documents=request.documents, metadatas=request.metadatas, ids=ids)
 

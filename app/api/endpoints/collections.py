@@ -6,8 +6,10 @@ from chromadb.api.collection_configuration import (
     UpdateCollectionConfiguration,
     UpdateHNSWConfiguration,
 )
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 from fastapi import APIRouter, HTTPException
 
+from app.core.config import get_settings
 from app.db.client import get_chroma_client
 from app.models.collection import (
     CollectionInfoResponse,
@@ -16,13 +18,13 @@ from app.models.collection import (
     ModifyCollectionRequest,
     SuccessResponse,
 )
-from app.utils.embedding_functions import get_embedding_function
 
+settings = get_settings()
 router = APIRouter()
 
 
 @router.get("/", response_model=CollectionListResponse)
-async def list_collections(limit: int | None = None, offset: int | None = None) -> CollectionListResponse:
+async def list_collections(limit: int = 10, offset: int = 0) -> CollectionListResponse:
     """List all collection names in the Chroma database with pagination support.
 
     Args:
@@ -53,12 +55,17 @@ async def create_collection(request: CreateCollectionRequest) -> SuccessResponse
     client = get_chroma_client()
 
     try:
-        embedding_function = get_embedding_function()  # openai
-
         hnsw_config = CreateHNSWConfiguration()
-        configuration = CreateCollectionConfiguration(hnsw=hnsw_config, embedding_function=embedding_function)
+        configuration = CreateCollectionConfiguration(hnsw=hnsw_config)
 
-        client.create_collection(name=request.collection_name, configuration=configuration)
+        client.create_collection(
+            name=request.collection_name,
+            configuration=configuration,
+            embedding_function=OpenAIEmbeddingFunction(
+                api_key=settings.OPENAI_API_KEY,
+                model_name="text-embedding-3-small",
+            ),
+        )
 
         return SuccessResponse(message=f"Successfully created collection {request.collection_name}")
     except Exception as e:
