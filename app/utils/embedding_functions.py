@@ -44,11 +44,6 @@ def get_embedding_function(name: str | None = "openai") -> EmbeddingFunction:
     Raises:
         ValueError: If the requested embedding function is not available
     """
-    if name not in available_embedding_functions:
-        raise ValueError(
-            f"Embedding function '{name}' is not available. Choose from: {', '.join(available_embedding_functions.keys())}"
-        )
-
     if name == "openai" or name is None:
         return get_openai_embedding_function()
     else:
