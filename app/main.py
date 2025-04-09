@@ -19,8 +19,8 @@ add_mcp_server(
     app,  # Your FastAPI app
     mount_path="/mcp",  # Where to mount the MCP server
     name="ChromaDB FastAPI MCP",  # Name for the MCP server
+    base_url=settings.MCP_BASE_URL or f"http://{settings.APP_HOST}:{settings.APP_PORT}",  # Base URL for the MCP server
 )
-
 
 # Add CORS middleware
 app.add_middleware(

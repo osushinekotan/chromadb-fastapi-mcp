@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     APP_DESCRIPTION: str = "FastAPI server for ChromaDB"
     APP_HOST: str = Field(description="Host for the FastAPI server")
     APP_PORT: int = Field(description="Port for the FastAPI server")
+    MCP_BASE_URL: str | None = Field(description="Base URL for the MCP server")
 
     # ChromaDB settings
     CHROMA_CLIENT_TYPE: str = Field(
