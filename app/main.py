@@ -1,3 +1,4 @@
+import dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_mcp import add_mcp_server
@@ -5,6 +6,7 @@ from fastapi_mcp import add_mcp_server
 from app.api.router import api_router
 from app.core.config import get_settings
 
+dotenv.load_dotenv(override=True)
 settings = get_settings()
 
 # Initialize FastAPI app
