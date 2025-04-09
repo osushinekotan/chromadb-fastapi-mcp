@@ -3,8 +3,8 @@ from chromadb.utils.embedding_functions import (
     DefaultEmbeddingFunction,
     OpenAIEmbeddingFunction,
 )
+
 from app.core.config import get_settings
-from typing import Dict, Type
 
 settings = get_settings()
 
@@ -26,13 +26,13 @@ def get_openai_embedding_function() -> OpenAIEmbeddingFunction:
 
 
 # Dictionary of available embedding functions
-available_embedding_functions: Dict[str, Type[EmbeddingFunction]] = {
+available_embedding_functions: dict[str, type[EmbeddingFunction]] = {
     "default": DefaultEmbeddingFunction,
     "openai": OpenAIEmbeddingFunction,
 }
 
 
-def get_embedding_function(name: str = "openai") -> EmbeddingFunction:
+def get_embedding_function(name: str | None = "openai") -> EmbeddingFunction:
     """Get the specified embedding function.
 
     Args:
@@ -49,7 +49,7 @@ def get_embedding_function(name: str = "openai") -> EmbeddingFunction:
             f"Embedding function '{name}' is not available. Choose from: {', '.join(available_embedding_functions.keys())}"
         )
 
-    if name == "openai":
+    if name == "openai" or name is None:
         return get_openai_embedding_function()
     else:
         return available_embedding_functions[name]()

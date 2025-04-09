@@ -8,7 +8,7 @@ class CreateCollectionRequest(BaseModel):
 
     collection_name: str = Field(..., description="Name of the collection to create")
     embedding_function_name: str | None = Field(
-        default="openai", description="Name of the embedding function to use. Options: 'default', 'openai'"
+        default=None, description="Name of the embedding function to use. Options: 'default', 'openai'"
     )
     metadata: dict[str, Any] | None = Field(default=None, description="Optional metadata dict to add to the collection")
     space: str | None = Field(
