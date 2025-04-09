@@ -21,7 +21,6 @@ class Settings(BaseSettings):
     CHROMA_DATA_DIR: str | None = Field(
         description="Directory for persistent client data (only used with persistent client)",
     )
-    CHROMA_DOTENV_PATH: str = Field(description="Path to .env file")
 
     # OpenAI API key for embedding
     OPENAI_API_KEY: str | None = Field(description="OpenAI API key for embedding function")

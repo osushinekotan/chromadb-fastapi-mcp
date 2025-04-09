@@ -33,7 +33,7 @@ async def add_documents(request: AddDocumentsRequest) -> SuccessResponse:
         raise HTTPException(status_code=400, detail="The 'documents' list cannot be empty.")
 
     client = get_chroma_client()
-    print("Number of documents that can be inserted at once: ", client.max_batch_size)
+    print("Number of documents that can be inserted at once: ", client.get_max_batch_size())
     try:
         collection = client.get_or_create_collection(
             request.collection_name,
@@ -75,7 +75,13 @@ async def query_documents(request: QueryDocumentsRequest) -> QueryResponse:
 
     client = get_chroma_client()
     try:
-        collection = client.get_collection(request.collection_name)
+        collection = client.get_collection(
+            request.collection_name,
+            embedding_function=OpenAIEmbeddingFunction(
+                api_key=settings.OPENAI_API_KEY,
+                model_name="text-embedding-3-small",
+            ),
+        )
         results = collection.query(
             query_texts=request.query_texts,
             n_results=request.n_results,
